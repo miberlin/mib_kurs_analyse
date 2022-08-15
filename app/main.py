@@ -16,14 +16,14 @@ def main():
     all_dates_kurse = df_termine[cfg['plots']['kurse']['fields']]
 
     # Studenten ID
-    mib_id = str(get_param('mib_id')) #streamlit.text_input('Student', value=str(get_param('mib_id')))
+    kurs_id = str(get_param('kurs_id'))
 
     # Options to select o sidebar
-    kurs_id = df_studentenxtermine[df_studentenxtermine['MiB-ID']==mib_id]['MiB-Kurs-Name']
-    kurs_id = kurs_id.unique()
+    # kurs_id = df_studentenxtermine[df_studentenxtermine['MiB-ID']==mib_id]['MiB-Kurs-Name']
+    # kurs_id = kurs_id.unique()
 
     # Select value range for courses
-    course_dates = all_dates_kurse[all_dates_kurse['MiB-Kurs-Name'] == kurs_id.any()]
+    course_dates = all_dates_kurse[all_dates_kurse['MiB-Kurs-Name'] == kurs_id]
     course_dates = course_dates['Datum-df']
     min_date_kurs, max_date_kurs = min_max_dates(course_dates)
 
@@ -35,9 +35,8 @@ def main():
         end_date = streamlit.date_input('Enddatum', min_value=min_date_kurs,
                                         max_value=max_date_kurs, value=max_date_kurs)
 
-    plot_student_data(df_studentenxtermine,df_pk_stud, cfg, mib_id, start_date, end_date)
+    plot_kurs_data(df_studentenxtermine, cfg, kurs_id, start_date, end_date)
 
 
 if __name__ == "__main__":
     main()
-

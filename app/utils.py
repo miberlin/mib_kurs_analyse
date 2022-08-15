@@ -8,7 +8,7 @@ import matplotlib.pyplot
 import streamlit
 from scipy.interpolate import interp1d
 from datetime import datetime
-import os
+import seaborn
 
 
 AIRTABLE_API_KEY = streamlit.secrets['AIRTABLE_API_KEY']
@@ -300,16 +300,37 @@ def student_data_table(df, id, start_date, end_date):
 
 
 @streamlit.cache
-def kurs_plot_data_options(df,cfg,student_id,start_date,end_date):
+def kurs_plot_data_options(df, df_pk,cfg,kurs_id,start_date,end_date):
+    # Student data
     kurs_data = df[cfg['plots']['kurse']['fields']]
-    values_name = kurs_data[kurs_data['MiB-Kurs-Name'] == student_id]
+
+    # Student data for exam results
+    pk_results_data = df_pk[cfg['plots']['kurse']['pk_results']]
+
+    all_data = pandas.concat([kurs_data, pk_results_data])
+    all_data['Art des Termin'] = all_data['Art des Termin'].fillna('PK')
+    values_name = all_data[all_data['MiB-Kurs-Name'] == kurs_id]
+    values_name['Datum-df'] = pandas.to_datetime(values_name['Datum-df'], format='%d/%m/%y')
+    values_name.sort_values(by='Datum-df', inplace=True)
+    values_name['Datum-df'] = values_name['Datum-df'].dt.date
+    values_name['Datum-df'] = values_name['Datum-df'].loc[(start_date <= values_name['Datum-df']) &
+                                                          (end_date >= values_name['Datum-df'])]
+    values_name['Datum-df'] = pandas.to_datetime(values_name['Datum-df'])
+    values_name['Datum-df'] = values_name['Datum-df'].dt.strftime('%d/%m/%y')
     dates = values_name['Datum-df']
-    dates = pandas.to_datetime(dates, format='%d/%m/%y')
-    dates = dates.dt.date.sort_values()
-    dates = dates.loc[(start_date <= dates) & (end_date >= dates)]
-    dates = pandas.to_datetime(dates)
-    dates = dates.dt.strftime('%d/%m/%y')
+
     values_name = values_name.loc[values_name['Datum-df'].isin(dates)]
+    ###
+    # kurs_data = df[cfg['plots']['kurse']['fields']]
+    # values_name = kurs_data[kurs_data['MiB-Kurs-Name'] == kurs_id]
+    # dates = values_name['Datum-df']
+    # dates = pandas.to_datetime(dates, format='%d/%m/%y')
+    # dates = dates.dt.date.sort_values()
+    # dates = dates.loc[(start_date <= dates) & (end_date >= dates)]
+    # dates = pandas.to_datetime(dates)
+    # dates = dates.dt.strftime('%d/%m/%y')
+    # values_name = values_name.loc[values_name['Datum-df'].isin(dates)]
+
     number_of_values = values_name.shape[0]
     values_range = numpy.linspace(0, number_of_values - 1, num=number_of_values)
     anw = values_name['Anwesenheit Rollup (from Studenten x Termine)']
@@ -318,10 +339,16 @@ def kurs_plot_data_options(df,cfg,student_id,start_date,end_date):
     aufm = values_name['Aufmerksamkeit Mittel'] / (numpy.ones(number_of_values) * 5)
     vers = values_name['Verständnis Mittel'] / (numpy.ones(number_of_values) * 5)
     fun = values_name['Fun Mittel'] / (numpy.ones(number_of_values) * 10)
-    return values_range, anw_percent, aufm, vers, fun, dates
+
+    pk_idx = numpy.array(values_name['Art des Termin'])
+    pk_idx = numpy.argwhere(pk_idx == 'PK').flatten()
+    # pk_results = values_name[pk_idx]
+    pk_actual_points = values_name['Erreicht Prozentual'].dropna() * 100
+
+    return values_range, anw_percent, aufm, vers, fun, dates, pk_idx, pk_actual_points
 
 
-def plot_kurs_data(df, cfg, student_id,start_date,end_date):
+def plot_kurs_data(df, df_pk, cfg, kurs_id,start_date,end_date):
 
     # define columns in dashboard
     col1, col2 = streamlit.columns((1.5, 5))
@@ -332,12 +359,12 @@ def plot_kurs_data(df, cfg, student_id,start_date,end_date):
         vers_checkbox = streamlit.checkbox('Verständnis', value=True)
         fun_checkbox = streamlit.checkbox('Fun Faktor', value=True)
         anw_checkbox = streamlit.checkbox('Anwesenheit', value=True)
+        pk_checkbox = streamlit.checkbox('PK Ergebnisse', value=True)
 
         fig,ax = matplotlib.pyplot.subplots()
         fig.set_size_inches(16,8)
         # plot options
-        values_range, anw_percent, aufm, vers, fun, dates = kurs_plot_data_options(df,cfg,student_id
-                                                                                   ,start_date,end_date)
+        values_range, anw_percent, aufm, vers, fun, dates, pk_idx, pk_actual_points = kurs_plot_data_options(df,df_pk,cfg,kurs_id,start_date,end_date)
         if aufm_checkbox:
             ax.plot(values_range,100*aufm,label='Aufmerksamkeit',linewidth=4,
                     linestyle='-',color='orange',zorder=-1)
@@ -350,13 +377,17 @@ def plot_kurs_data(df, cfg, student_id,start_date,end_date):
         if anw_checkbox:
             ax.plot(values_range,100*anw_percent,label='Anwesenheit',linewidth=4,
                     linestyle='--',color='black')
+        if pk_checkbox:
+            seaborn.violinplot(x=pk_idx,y=pk_actual_points, axis=ax)
+            streamlit.write(pk_actual_points)
+
 
         matplotlib.pyplot.legend(fontsize=14)
-        matplotlib.pyplot.title(f'Die Informationen über {student_id}',fontsize=14)
-        matplotlib.pyplot.xlabel('Datum',fontsize=14)
-        matplotlib.pyplot.ylabel('Prozent',fontsize=14)
-        matplotlib.pyplot.xticks(values_range,labels=dates,fontsize=14,rotation=45)
-        matplotlib.pyplot.yticks(100*numpy.linspace(0,1,11),fontsize=14)
+        # matplotlib.pyplot.title(f'Die Informationen über {student_id}',fontsize=14)
+        # matplotlib.pyplot.xlabel('Datum',fontsize=10)
+        # matplotlib.pyplot.ylabel('Prozent',fontsize=10)
+        matplotlib.pyplot.xticks(values_range,labels=dates,fontsize=10,rotation=45)
+        matplotlib.pyplot.yticks(['0 %', '25 %', '50 %', '75 %', '100 %'],fontsize=10)
         matplotlib.pyplot.grid(linewidth=.4)
         # matplotlib.pyplot.show()
 
