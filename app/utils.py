@@ -382,6 +382,7 @@ def plot_kurs_data(df, df_pk, cfg, kurs_id,start_date,end_date):
             streamlit.write(pk_actual_points)
 
 
+
         matplotlib.pyplot.legend(fontsize=14)
         # matplotlib.pyplot.title(f'Die Informationen über {student_id}',fontsize=14)
         # matplotlib.pyplot.xlabel('Datum',fontsize=10)
