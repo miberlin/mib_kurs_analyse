@@ -10,7 +10,6 @@ from scipy.interpolate import interp1d
 from datetime import datetime
 import seaborn
 
-
 AIRTABLE_API_KEY = streamlit.secrets['AIRTABLE_API_KEY']
 
 
@@ -303,13 +302,8 @@ def student_data_table(df, id, start_date, end_date):
 def kurs_plot_data_options(df, df_pk,cfg,kurs_id,start_date,end_date):
     # Student data
     kurs_data = df[cfg['plots']['kurse']['fields']]
-
-    # Student data for exam results
-    pk_results_data = df_pk[cfg['plots']['kurse']['pk_results']]
-
-    all_data = pandas.concat([kurs_data, pk_results_data])
-    all_data['Art des Termin'] = all_data['Art des Termin'].fillna('PK')
-    values_name = all_data[all_data['MiB-Kurs-Name'] == kurs_id]
+    kurs_data['Art des Termins'] = kurs_data['Art des Termins'].fillna('PK')
+    values_name = kurs_data[kurs_data['MiB-Kurs-Name'] == kurs_id]
     values_name['Datum-df'] = pandas.to_datetime(values_name['Datum-df'], format='%d/%m/%y')
     values_name.sort_values(by='Datum-df', inplace=True)
     values_name['Datum-df'] = values_name['Datum-df'].dt.date
@@ -320,16 +314,6 @@ def kurs_plot_data_options(df, df_pk,cfg,kurs_id,start_date,end_date):
     dates = values_name['Datum-df']
 
     values_name = values_name.loc[values_name['Datum-df'].isin(dates)]
-    ###
-    # kurs_data = df[cfg['plots']['kurse']['fields']]
-    # values_name = kurs_data[kurs_data['MiB-Kurs-Name'] == kurs_id]
-    # dates = values_name['Datum-df']
-    # dates = pandas.to_datetime(dates, format='%d/%m/%y')
-    # dates = dates.dt.date.sort_values()
-    # dates = dates.loc[(start_date <= dates) & (end_date >= dates)]
-    # dates = pandas.to_datetime(dates)
-    # dates = dates.dt.strftime('%d/%m/%y')
-    # values_name = values_name.loc[values_name['Datum-df'].isin(dates)]
 
     number_of_values = values_name.shape[0]
     values_range = numpy.linspace(0, number_of_values - 1, num=number_of_values)
@@ -340,12 +324,32 @@ def kurs_plot_data_options(df, df_pk,cfg,kurs_id,start_date,end_date):
     vers = values_name['Verständnis Mittel'] / (numpy.ones(number_of_values) * 5)
     fun = values_name['Fun Mittel'] / (numpy.ones(number_of_values) * 10)
 
-    pk_idx = numpy.array(values_name['Art des Termin'])
-    pk_idx = numpy.argwhere(pk_idx == 'PK').flatten()
-    # pk_results = values_name[pk_idx]
-    pk_actual_points = values_name['Erreicht Prozentual'].dropna() * 100
+    pk_arr = numpy.array(values_name[['Art des Termins','Datum-df']])
+    pk_idx = numpy.argwhere(pk_arr[:,0] == 'PK').flatten()
+    pk_datum = pk_arr[:,1][pk_idx]
+    pk_data = pandas.DataFrame(data={'PK-Index':pk_idx, 'Datum-df':pk_datum},index=numpy.arange(len(pk_idx)))
 
-    return values_range, anw_percent, aufm, vers, fun, dates, pk_idx, pk_actual_points
+    pk_result_data = df_pk[cfg['plots']['kurse']['pk_results']]
+    pk_result_data = pk_result_data[pk_result_data['MiB-Kurs-Name'] == kurs_id]
+    pk_result_data['Datum-df'] = pandas.to_datetime(pk_result_data['Datum-df'], format='%d/%m/%y')
+    pk_result_data.sort_values(by='Datum-df', inplace=True)
+    pk_result_data['Datum-df'] = pk_result_data['Datum-df'].dt.date
+    pk_result_data['Datum-df'] = pk_result_data['Datum-df'].loc[(start_date <= pk_result_data['Datum-df']) &
+                                                          (end_date >= pk_result_data['Datum-df'])]
+    pk_result_data['Datum-df'] = pandas.to_datetime(pk_result_data['Datum-df'])
+    pk_result_data['Datum-df'] = pk_result_data['Datum-df'].dt.strftime('%d/%m/%y')
+    pk_result_data['PK-Index']=np.nan
+
+    for idx in range(pk_data.shape[0]):
+        datum = pk_data['Datum-df'][idx]
+        index = pk_data['PK-Index'][idx]
+        rows = pk_result_data.index[pk_result_data['Datum-df']==datum].tolist()
+        pk_result_data['PK-Index'][rows]=index
+    pk_result_data['Erreicht Prozentual'] = pk_result_data['Erreicht Prozentual']*100
+    pk_data = pk_result_data.reset_index()
+    pk_data['PK-Index']= pk_data['PK-Index'].astype('int')
+    pk_data = pk_data[['Erreicht Prozentual','PK-Index']]
+    return values_range, anw_percent, aufm, vers, fun, dates, pk_data
 
 
 def plot_kurs_data(df, df_pk, cfg, kurs_id,start_date,end_date):
@@ -364,7 +368,8 @@ def plot_kurs_data(df, df_pk, cfg, kurs_id,start_date,end_date):
         fig,ax = matplotlib.pyplot.subplots()
         fig.set_size_inches(16,8)
         # plot options
-        values_range, anw_percent, aufm, vers, fun, dates, pk_idx, pk_actual_points = kurs_plot_data_options(df,df_pk,cfg,kurs_id,start_date,end_date)
+        values_range, anw_percent, aufm, vers, fun, dates, pk_data = kurs_plot_data_options(df,df_pk,cfg,kurs_id,
+                                                                                            start_date,end_date)
         if aufm_checkbox:
             ax.plot(values_range,100*aufm,label='Aufmerksamkeit',linewidth=4,
                     linestyle='-',color='orange',zorder=-1)
@@ -378,8 +383,11 @@ def plot_kurs_data(df, df_pk, cfg, kurs_id,start_date,end_date):
             ax.plot(values_range,100*anw_percent,label='Anwesenheit',linewidth=4,
                     linestyle='--',color='black')
         if pk_checkbox:
-            seaborn.violinplot(x=pk_idx,y=pk_actual_points, axis=ax)
-            streamlit.write(pk_actual_points)
+            extra = numpy.empty((75,3))
+            extra.fill(numpy.nan)
+            extra = pandas.DataFrame(extra)
+            pk_data_plot = extra.join(pk_data)
+            seaborn.violinplot(x='PK-Index',y='Erreicht Prozentual',data=pk_data,ax=ax,dodge=False)
 
 
 
@@ -388,7 +396,7 @@ def plot_kurs_data(df, df_pk, cfg, kurs_id,start_date,end_date):
         # matplotlib.pyplot.xlabel('Datum',fontsize=10)
         # matplotlib.pyplot.ylabel('Prozent',fontsize=10)
         matplotlib.pyplot.xticks(values_range,labels=dates,fontsize=10,rotation=45)
-        matplotlib.pyplot.yticks(['0 %', '25 %', '50 %', '75 %', '100 %'],fontsize=10)
+        matplotlib.pyplot.yticks(numpy.linspace(0,100,5),labels = ['0 %', '25 %', '50 %', '75 %', '100 %'],fontsize=10)
         matplotlib.pyplot.grid(linewidth=.4)
         # matplotlib.pyplot.show()
 

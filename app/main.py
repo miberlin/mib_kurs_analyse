@@ -3,13 +3,14 @@ def main():
 
     # Them  config streamlit
     streamlit.set_page_config(layout='wide')
-    set_page_container_style()
+    #set_page_container_style()
 
     # read the configuration file and initialize random generators
-    cfg = read_config('/app/mib_studenten_analyse/app/config/config.yaml')
+    # cfg = read_config('/app/mib_kurs_analyse/app/config/config.yaml')
+    cfg = read_config('/app/mib_kurs_analyse/app/config/config.yaml')
 
     # read dataframes
-    df_termine, df_studenten, df_studentenxtermine, df_pk_stud = generate_dataframes(cfg)
+    df_termine, df_studenten, df_studentenxtermine, df_pk_kurs = generate_dataframes(cfg)
 
     # Kurs Info
     # Kurs dataframe
@@ -35,7 +36,7 @@ def main():
         end_date = streamlit.date_input('Enddatum', min_value=min_date_kurs,
                                         max_value=max_date_kurs, value=max_date_kurs)
 
-    plot_kurs_data(df_studentenxtermine, cfg, kurs_id, start_date, end_date)
+    plot_kurs_data(df_termine, df_pk_kurs, cfg, kurs_id, start_date, end_date)
 
 
 if __name__ == "__main__":
