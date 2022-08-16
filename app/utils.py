@@ -390,8 +390,8 @@ def plot_kurs_data(df, df_pk, cfg, kurs_id,start_date,end_date):
         ax.violinplot(dataset = test, positions=pk_idx)
 
     matplotlib.pyplot.legend(fontsize=14)
-    matplotlib.pyplot.xticks(values_range,labels=dates,fontsize=10,rotation=45)
-    matplotlib.pyplot.yticks(numpy.linspace(0,100,5),labels = ['0 %', '25 %', '50 %', '75 %', '100 %'],fontsize=10)
+    matplotlib.pyplot.xticks(values_range,labels=dates,fontsize=12,rotation=45)
+    matplotlib.pyplot.yticks(numpy.linspace(0,100,5),labels = ['0 %', '25 %', '50 %', '75 %', '100 %'],fontsize=12)
     matplotlib.pyplot.grid(linewidth=.4)
 
     # Show figure in Dashboard
