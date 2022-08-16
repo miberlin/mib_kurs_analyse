@@ -428,6 +428,7 @@ def set_page_container_style():
                             padding-top: 0rem !important;
                         }}
                         .stApp {{
+                            font-family: 'Montserrat';
                             color: black !important;
                             background-color: white !important;
                         }}
