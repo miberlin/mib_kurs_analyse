@@ -6,7 +6,6 @@ def main():
     #set_page_container_style()
 
     # read the configuration file and initialize random generators
-    # cfg = read_config('/app/mib_kurs_analyse/app/config/config.yaml')
     cfg = read_config('/app/mib_kurs_analyse/app/config/config.yaml')
 
     # read dataframes

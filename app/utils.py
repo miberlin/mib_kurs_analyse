@@ -12,7 +12,6 @@ import seaborn
 
 AIRTABLE_API_KEY = streamlit.secrets['AIRTABLE_API_KEY']
 
-
 @streamlit.cache
 def read_config(filename):
     with open(filename) as f:
@@ -383,22 +382,15 @@ def plot_kurs_data(df, df_pk, cfg, kurs_id,start_date,end_date):
             ax.plot(values_range,100*anw_percent,label='Anwesenheit',linewidth=4,
                     linestyle='--',color='black')
         if pk_checkbox:
-            extra = numpy.empty((75,3))
-            extra.fill(numpy.nan)
-            extra = pandas.DataFrame(extra)
-            pk_data_plot = extra.join(pk_data)
-            seaborn.violinplot(x='PK-Index',y='Erreicht Prozentual',data=pk_data,ax=ax,dodge=False)
-
-
+            test = pk_data.groupby('PK-Index', sort=False)['Erreicht Prozentual'].apply(list)
+            pk_idx = pk_data['PK-Index'].unique()
+            test = np.array(test)
+            ax.violinplot(dataset = test, positions=pk_idx)
 
         matplotlib.pyplot.legend(fontsize=14)
-        # matplotlib.pyplot.title(f'Die Informationen über {student_id}',fontsize=14)
-        # matplotlib.pyplot.xlabel('Datum',fontsize=10)
-        # matplotlib.pyplot.ylabel('Prozent',fontsize=10)
         matplotlib.pyplot.xticks(values_range,labels=dates,fontsize=10,rotation=45)
         matplotlib.pyplot.yticks(numpy.linspace(0,100,5),labels = ['0 %', '25 %', '50 %', '75 %', '100 %'],fontsize=10)
         matplotlib.pyplot.grid(linewidth=.4)
-        # matplotlib.pyplot.show()
 
         # Show figure in Dashboard
         with col2:
