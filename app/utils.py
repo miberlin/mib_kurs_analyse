@@ -430,7 +430,7 @@ def set_page_container_style():
                             color: black !important;
                             background-color: white !important;
                         }}
-                        .css-qri22k {{
+                        .css-1avcm0n {{
                             display: none !important;
                         }}
                         .css-18ni7ap {{
