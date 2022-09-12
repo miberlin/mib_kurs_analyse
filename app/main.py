@@ -17,10 +17,6 @@ def main():
     # Studenten ID
     kurs_id = str(get_param('kurs_id'))
 
-    # Options to select o sidebar
-    # kurs_id = df_studentenxtermine[df_studentenxtermine['MiB-ID']==mib_id]['MiB-Kurs-Name']
-    # kurs_id = kurs_id.unique()
-
     # Select value range for courses
     course_dates = all_dates_kurse[all_dates_kurse['MiB-Kurs-Name'] == kurs_id]
     course_dates = course_dates['Datum-df']
