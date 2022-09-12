@@ -181,7 +181,7 @@ def kurs_plot_data_options(df, df_pk,cfg,kurs_id,start_date,end_date):
     pk_datum = pk_arr[:, 1][pk_idx]
     pk_data = pandas.DataFrame(data={'PK-Index': pk_idx, 'Datum-df': pk_datum}, index=numpy.arange(len(pk_idx)))
 
-    pk_result_data = df_pk[cfg['plots']['kurse']['pk_results']]
+    pk_result_data = df_pk[cfg['plots']['students']['pk_results']]
     pk_result_data = pk_result_data[pk_result_data['MiB-Kurs-Name'] == kurs_id]
     pk_result_data['Datum-df'] = pandas.to_datetime(pk_result_data['Datum-df'], format='%d/%m/%y')
     pk_result_data.sort_values(by='Datum-df', inplace=True)
