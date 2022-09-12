@@ -169,7 +169,7 @@ def kurs_plot_data_options(df, df_pk,cfg,kurs_id,start_date,end_date):
 
     number_of_values = values_name.shape[0]
     values_range = numpy.linspace(0, number_of_values - 1, num=number_of_values)
-    anw = values_name['Anwesenheit Rollup (from Studenten x Termine)']
+    anw = values_name['Anwesenheit (from Studenten x Termine)']
     total_students = values_name['Studentenanzahl (from Studenten x Termine)']
     anw_percent = anw / total_students
     aufm = numpy.array(values_name['Aufmerksamkeit Mittel Prozentual'])
