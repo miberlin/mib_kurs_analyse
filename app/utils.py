@@ -174,7 +174,7 @@ def kurs_plot_data_options(df, df_pk,cfg,kurs_id,start_date,end_date):
     anw_percent = anw / total_students
     aufm = numpy.array(values_name['Aufmerksamkeit Mittel Prozentual'])
     vers = numpy.array(values_name['Verständnis Mittel Prozentual'])
-    fun = nnumpy.array(values_name['Fun Mittel Prozentual'])
+    fun = numpy.array(values_name['Fun Mittel Prozentual'])
 
     pk_arr = numpy.array(values_name[['Art des Termins', 'Datum-df']])
     pk_idx = numpy.argwhere(pk_arr[:, 0] == 'PK').flatten()
