@@ -172,7 +172,7 @@ def kurs_plot_data_options(df, df_pk,cfg,kurs_id,start_date,end_date):
     anw = values_name['Anwesenheit (from Studenten x Termine)']
     total_students = values_name['Studentenanzahl (from Studenten x Termine)']
     anw_percent = anw / total_students
-    aufm = numpy.array(values_name['Aufmerksamkeit Mittel Prozentual'])
+    aufm = values_name['Aufmerksamkeit Mittel Prozentual'].astype('float64')
     vers = numpy.array(values_name['Verständnis Mittel Prozentual'])
     fun = numpy.array(values_name['Fun Mittel Prozentual'])
 
@@ -190,7 +190,7 @@ def kurs_plot_data_options(df, df_pk,cfg,kurs_id,start_date,end_date):
                                                           (end_date >= pk_result_data['Datum-df'])]
     pk_result_data['Datum-df'] = pandas.to_datetime(pk_result_data['Datum-df'])
     pk_result_data['Datum-df'] = pk_result_data['Datum-df'].dt.strftime('%d/%m/%y')
-    pk_result_data['PK-Index']=np.nan
+    pk_result_data['PK-Index'] = np.nan
 
     for idx in range(pk_data.shape[0]):
         datum = pk_data['Datum-df'][idx]
