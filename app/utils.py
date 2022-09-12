@@ -82,7 +82,7 @@ def list_airtable_records(base, table, cfg):
         for cat in table_dict['to_clean']:
             df[cat] = df[cat].str[0]
         for cat in table_dict['clean_nan']:
-            df[cat] = df[cat]#.astype('float64')
+            df[cat] = df[cat].astype('float64')
     elif table_name == "PK Ergebnisse":
         for cat in table_dict['to_clean']:
             df[cat] = df[cat].str[0]
@@ -172,7 +172,7 @@ def kurs_plot_data_options(df, df_pk,cfg,kurs_id,start_date,end_date):
     anw = values_name['Anwesenheit (from Studenten x Termine)']
     total_students = values_name['Studentenanzahl (from Studenten x Termine)']
     anw_percent = anw / total_students
-    aufm = values_name['Aufmerksamkeit Mittel Prozentual'].astype('float64')
+    aufm = values_name['Aufmerksamkeit Mittel Prozentual']
     vers = numpy.array(values_name['Verständnis Mittel Prozentual'])
     fun = numpy.array(values_name['Fun Mittel Prozentual'])
 
