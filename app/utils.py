@@ -172,9 +172,9 @@ def kurs_plot_data_options(df, df_pk,cfg,kurs_id,start_date,end_date):
     anw = values_name['Anwesenheit Rollup (from Studenten x Termine)']
     total_students = values_name['Studentenanzahl (from Studenten x Termine)']
     anw_percent = anw / total_students
-    aufm = values_name['Aufmerksamkeit Mittel Prozentual']
-    vers = values_name['Verständnis Mittel Prozentual']
-    fun = values_name['Fun Mittel Prozentual']
+    aufm = numpy.array(values_name['Aufmerksamkeit Mittel Prozentual'])
+    vers = numpy.array(values_name['Verständnis Mittel Prozentual'])
+    fun = nnumpy.array(values_name['Fun Mittel Prozentual'])
 
     pk_arr = numpy.array(values_name[['Art des Termins', 'Datum-df']])
     pk_idx = numpy.argwhere(pk_arr[:, 0] == 'PK').flatten()
