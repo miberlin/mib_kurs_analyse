@@ -207,47 +207,48 @@ def kurs_plot_data_options(df, df_pk,cfg,kurs_id,start_date,end_date):
 def plot_kurs_data(df, df_pk, cfg, kurs_id,start_date,end_date):
 
     # define columns in dashboard
-    col1, col2 = streamlit.columns((1.5, 5))
+    col1, col2, col3 = streamlit.columns(3)
 
     # Line selection using checkboxes
     with col1:
         aufm_checkbox = streamlit.checkbox('Aufmerksamkeit', value=True)
         vers_checkbox = streamlit.checkbox('Verständnis', value=True)
+    with col2:
         fun_checkbox = streamlit.checkbox('Fun Faktor', value=True)
         anw_checkbox = streamlit.checkbox('Anwesenheit', value=True)
+    with col3:
         pk_checkbox = streamlit.checkbox('PK Ergebnisse', value=True)
 
-        fig,ax = matplotlib.pyplot.subplots()
-        fig.set_size_inches(16,8)
-        # plot options
-        values_range, anw_percent, aufm, vers, fun, dates, pk_data = kurs_plot_data_options(df,df_pk,cfg,kurs_id,
-                                                                                            start_date,end_date)
-        if aufm_checkbox:
-            ax.plot(values_range,100*aufm,label='Aufmerksamkeit',linewidth=4,
-                    linestyle='-',color='orange',zorder=-1)
-        if vers_checkbox:
-            ax.plot(values_range,100*vers,label='Verständnis',linewidth=4,
-                    linestyle='-',color='green',zorder=-1)
-        if fun_checkbox:
-            ax.plot(values_range,100*fun,label='Fun',linewidth=4,
-                    linestyle='-',color='blue',zorder=-1)
-        if anw_checkbox:
-            ax.plot(values_range,100*anw_percent,label='Anwesenheit',linewidth=4,
-                    linestyle='--',color='black')
-        if pk_checkbox:
-            test = pk_data.groupby('PK-Index', sort=False)['Erreicht Prozentual'].apply(list)
-            pk_idx = pk_data['PK-Index'].unique()
-            test = np.array(test)
-            ax.violinplot(dataset = test, positions=pk_idx)
+    fig,ax = matplotlib.pyplot.subplots()
+    fig.set_size_inches(16,8)
+    # plot options
+    values_range, anw_percent, aufm, vers, fun, dates, pk_data = kurs_plot_data_options(df,df_pk,cfg,kurs_id,
+                                                                                        start_date,end_date)
+    if aufm_checkbox:
+        ax.plot(values_range,100*aufm,label='Aufmerksamkeit',linewidth=4,
+                linestyle='-',color='orange',zorder=-1)
+    if vers_checkbox:
+        ax.plot(values_range,100*vers,label='Verständnis',linewidth=4,
+                linestyle='-',color='green',zorder=-1)
+    if fun_checkbox:
+        ax.plot(values_range,100*fun,label='Fun',linewidth=4,
+                linestyle='-',color='blue',zorder=-1)
+    if anw_checkbox:
+        ax.plot(values_range,100*anw_percent,label='Anwesenheit',linewidth=4,
+                linestyle='--',color='black')
+    if pk_checkbox:
+        test = pk_data.groupby('PK-Index', sort=False)['Erreicht Prozentual'].apply(list)
+        pk_idx = pk_data['PK-Index'].unique()
+        test = np.array(test)
+        ax.violinplot(dataset = test, positions=pk_idx)
 
-        matplotlib.pyplot.legend(fontsize=14)
-        matplotlib.pyplot.xticks(values_range,labels=dates,fontsize=10,rotation=45)
-        matplotlib.pyplot.yticks(numpy.linspace(0,100,5),labels = ['0 %', '25 %', '50 %', '75 %', '100 %'],fontsize=10)
-        matplotlib.pyplot.grid(linewidth=.4)
+    matplotlib.pyplot.legend(fontsize=14)
+    matplotlib.pyplot.xticks(values_range,labels=dates,fontsize=12,rotation=45)
+    matplotlib.pyplot.yticks(numpy.linspace(0,100,5),labels = ['0 %', '25 %', '50 %', '75 %', '100 %'],fontsize=12)
+    matplotlib.pyplot.grid(linewidth=.4)
 
-        # Show figure in Dashboard
-        with col2:
-            streamlit.pyplot(fig)
+    # Show figure in Dashboard
+    streamlit.pyplot(fig)
 
 
 # Used for the variables wich are going to be prefill using JS
@@ -280,10 +281,11 @@ def set_page_container_style():
                             padding-top: 0rem !important;
                         }}
                         .stApp {{
+                            font-family: 'Montserrat';
                             color: black !important;
                             background-color: white !important;
                         }}
-                        .css-qri22k {{
+                        .css-14xtw13 {{
                             display: none !important;
                         }}
                         .css-18ni7ap {{
